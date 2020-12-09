@@ -1,5 +1,5 @@
 
-def build_():
+def input():
     f = open("input.txt", "r")
     groups = []
     for i in f.read().split("\n\n"):
