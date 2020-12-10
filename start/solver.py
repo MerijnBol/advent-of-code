@@ -9,6 +9,12 @@ def input():
         groups.append(entry)
     return groups
 
+def solve(puzzle=1):
+
+    if puzzle == 1:
+        return "1"
+    elif puzzle == 2:
+        return "2"
 
 
 def puzzle_1():

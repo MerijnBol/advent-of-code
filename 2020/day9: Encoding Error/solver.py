@@ -42,7 +42,7 @@ def check_xmas(puzzle, preamble):
         return (min(values) + max(values))
 
     def find_weakness(preamble):
-        x, weaklink = loop_through_numbers(preamble)
+        weaklink = loop_through_numbers(preamble)[1]
         index = 0
         while index < len(numbers):
             found, i1, i2 = check_for_index(index, weaklink)
