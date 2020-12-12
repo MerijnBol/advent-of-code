@@ -4,13 +4,19 @@ def input():
     f = open("input.txt", "r")
     return [[x[:1], int(x.strip("\n")[1:])] for x in f.readlines()]
 
-def sail(source_route, starting_point=[0, 0, 90]):
+def flip_values(instr):
+    """
+    Return an instruction with negative values for the opposite actions.
+    """
+    neg_values = ["S", "W", "L"]
+    if instr[0] in neg_values:
+        instr[1] = -1 * instr[1]
+    return instr
 
-    def flip_values(instr):
-        neg_values = ["S", "W", "L"]
-        if instr[0] in neg_values:
-            instr[1] = -1 * instr[1]
-        return instr
+def sail(source_route, starting_point=[0, 0, 90]):
+    """
+    Sail the ship based on direct movement instructions.
+    """
     route = [flip_values(instr) for instr in source_route]
     
     coord = {
@@ -52,12 +58,9 @@ def sail(source_route, starting_point=[0, 0, 90]):
 
 
 def sail_waypoint(source_route, starting_point=[0, 0, 10, 1]):
-
-    def flip_values(instr):
-        neg_values = ["S", "W", "L"]
-        if instr[0] in neg_values:
-            instr[1] = -1 * instr[1]
-        return instr
+    """
+    Sail the ship based on a waypoint movement system.
+    """
     route = [flip_values(instr) for instr in source_route]
     
     coord = {
