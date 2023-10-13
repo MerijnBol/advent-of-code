@@ -1,5 +1,10 @@
 __pycache__
 .venv
 .vscode
+
+# Don't track advent of codes unique puzzle inputs
 input.txt
 list.txt
+
+# RUST files
+target*
