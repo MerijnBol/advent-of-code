@@ -4,7 +4,13 @@ use std::fs;
 fn main() {
     let path: String = create_path_to_file("input.txt");
     let masses = read_input(&path);
-    println!("{}", calculate_fuel(masses));
+    println!("Fuel load puzzle 1: {} kg", calculate_fuel(&masses));
+
+    // puzzle 2
+    println!(
+        "Fuel load puzzle 2: {} kg",
+        calculate_recursive_fuel(&masses)
+    );
 }
 
 fn counter_upper(mass: u32) -> u32 {
@@ -14,10 +20,23 @@ fn counter_upper(mass: u32) -> u32 {
     return float as u32;
 }
 
-fn calculate_fuel(masses: Vec<u32>) -> u32 {
+fn calculate_fuel(masses: &Vec<u32>) -> u32 {
     let mut total = 0;
     for mass in masses.iter() {
         total += counter_upper(*mass)
+    }
+    return total;
+}
+
+fn calculate_recursive_fuel(masses: &Vec<u32>) -> u32 {
+    let mut total = 0;
+    for mass in masses.iter() {
+        let mut fuel: u32 = counter_upper(*mass);
+        total += fuel;
+        while fuel > 0 {
+            fuel = counter_upper(fuel);
+            total += fuel
+        }
     }
     return total;
 }
