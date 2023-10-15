@@ -26,37 +26,39 @@ fn puzzle_one_gives_correct_answer() {
     assert_eq!(puzzle_one(intcode), 3562624);
 }
 
-fn puzzle_two(intcode: Vec<u64>) {
-    let start_address = intcode;
+fn puzzle_two(intcode: Vec<u64>) -> u64 {
     let expected = 19690720;
     let mut noun = 0 as u64;
     let mut verb = 0 as u64;
-    'noun_loop: loop {
-        loop {
-            let mut address = start_address.clone();
-            address[1] = noun;
-            address[2] = verb;
-            let result = run_intcode(address);
+    // Test all noun and verb combinations until expected answer is found.
+    loop {
+        let mut address = intcode.clone();
+        address[1] = noun;
+        address[2] = verb;
+        let result = run_intcode(address);
 
-            if result[0] == expected {
-                break 'noun_loop;
-            }
-
-            verb += 1;
-
-            if verb == 100 {
-                verb = 0;
-                break;
-            }
-        }
-        noun += 1;
-
-        if noun == 100 {
+        if result[0] == expected {
             break;
+        }
+
+        if verb < 100 {
+            verb += 1;
+        } else {
+            verb = 0;
+            noun += 1;
         }
     }
 
-    println!("Expected result provided by code: '{}'", 100 * noun + verb)
+    let code = 100 * noun + verb;
+    println!("Expected result provided by code: '{}'", code);
+    code
+}
+
+#[test]
+fn test_puzzle_two_result() {
+    let path: String = create_path_to_file("input.txt");
+    let intcode = read_input(&path);
+    assert_eq!(puzzle_two(intcode), 8298);
 }
 
 fn run_intcode(intcode: Vec<u64>) -> Vec<u64> {
@@ -64,61 +66,24 @@ fn run_intcode(intcode: Vec<u64>) -> Vec<u64> {
     let mut pointer: usize = 0;
     loop {
         let instruction = intcode[pointer];
-        if instruction == 1 {
-            intcode = opcode_addition(pointer, intcode);
+        let target_index_1 = intcode[pointer + 1] as usize;
+        let target_index_2 = intcode[pointer + 2] as usize;
+        let target_index_3 = intcode[pointer + 3] as usize;
+        let out_of_bounds = target_index_1 >= intcode.len()
+            || target_index_2 >= intcode.len()
+            || target_index_3 >= intcode.len();
+
+        if instruction == 99 || out_of_bounds {
+            break;
+        } else if instruction == 1 {
+            intcode[target_index_3] = intcode[target_index_1] + intcode[target_index_2];
             pointer += 4;
         } else if instruction == 2 {
-            intcode = opcode_multiplication(pointer, intcode);
+            intcode[target_index_3] = intcode[target_index_1] * intcode[target_index_2];
             pointer += 4;
-        } else if instruction == 99 {
-            break;
         }
     }
     intcode
-}
-
-fn opcode_addition(index: usize, intcode: Vec<u64>) -> Vec<u64> {
-    let mut intcode = intcode;
-
-    let target_index_1 = intcode[index + 1] as usize;
-    let target_index_2 = intcode[index + 2] as usize;
-    let target_index_3 = intcode[index + 3] as usize;
-    if target_index_1 >= intcode.len()
-        || target_index_2 >= intcode.len()
-        || target_index_3 >= intcode.len()
-    {
-        return intcode;
-    }
-    intcode[target_index_3] = intcode[target_index_1] + intcode[target_index_2];
-    intcode
-}
-fn opcode_multiplication(index: usize, intcode: Vec<u64>) -> Vec<u64> {
-    let mut intcode = intcode;
-
-    let target_index_1 = intcode[index + 1] as usize;
-    let target_index_2 = intcode[index + 2] as usize;
-    let target_index_3 = intcode[index + 3] as usize;
-    if target_index_1 >= intcode.len()
-        || target_index_2 >= intcode.len()
-        || target_index_3 >= intcode.len()
-    {
-        return intcode;
-    }
-    intcode[target_index_3] = intcode[target_index_1] * intcode[target_index_2];
-    intcode
-}
-
-#[test]
-fn it_handles_addition() {
-    let intcode = vec![1, 9, 10, 3, 2, 3, 11, 0, 99, 30, 40, 50];
-    let expected = vec![1, 9, 10, 70, 2, 3, 11, 0, 99, 30, 40, 50];
-    assert_eq!(opcode_addition(0, intcode), expected);
-}
-#[test]
-fn it_handles_multiplication() {
-    let intcode = vec![1, 9, 10, 70, 2, 3, 11, 0, 99, 30, 40, 50];
-    let expected = vec![3500, 9, 10, 70, 2, 3, 11, 0, 99, 30, 40, 50];
-    assert_eq!(opcode_multiplication(4, intcode), expected);
 }
 
 fn create_path_to_file(filename: &str) -> String {
