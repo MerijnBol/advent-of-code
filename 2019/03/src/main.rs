@@ -1,13 +1,8 @@
-use std::iter::zip;
 use std::{env, fs};
 
 fn main() {
-    // let content = read_puzzle_input();
-    // let (line_one, line_two) = parse_content(&content);
-
-    let example =
-        String::from("R75,D30,R83,U83,L12,D49,R71,U7,L72\nU62,R66,U55,R34,D71,R55,D58,R83");
-    let (line_one, line_two) = parse_content(&example);
+    let content = read_puzzle_input();
+    let (line_one, line_two) = parse_content(&content);
 
     puzzle_one(&line_one, &line_two);
 }
@@ -15,9 +10,6 @@ fn main() {
 fn puzzle_one(line_one: &Vec<&str>, line_two: &Vec<&str>) -> i64 {
     let positions_one = get_positions(line_one);
     let positions_two = get_positions(line_two);
-    dbg!(&positions_one);
-    dbg!(&positions_two);
-
     let distance_closest_crossing = get_closest_crossing_distance(&positions_one, &positions_two);
     println!(
         "Manhatten distance of closest intersect is: {}",
@@ -35,10 +27,30 @@ fn get_positions(instructions: &Vec<&str>) -> Vec<(i64, i64)> {
         let command = &instruction[0..1];
         let pos = instruction[1..].parse::<i64>().unwrap();
         match command {
-            "R" => x += pos,
-            "L" => x -= pos,
-            "U" => y += pos,
-            "D" => y -= pos,
+            "R" => {
+                for _ in 0..pos {
+                    x += 1;
+                    positions.push((x, y));
+                }
+            }
+            "L" => {
+                for _ in 0..pos {
+                    x -= 1;
+                    positions.push((x, y));
+                }
+            }
+            "U" => {
+                for _ in 0..pos {
+                    y += 1;
+                    positions.push((x, y));
+                }
+            }
+            "D" => {
+                for _ in 0..pos {
+                    y -= 1;
+                    positions.push((x, y));
+                }
+            }
             &_ => (),
         }
         positions.push((x, y));
@@ -50,18 +62,19 @@ fn get_closest_crossing_distance(
     positions_one: &Vec<(i64, i64)>,
     positions_two: &Vec<(i64, i64)>,
 ) -> i64 {
-    let mut crossings: Vec<((i64, i64), i64)> = Vec::new();
-    for (index, position) in positions_one.iter().enumerate() {
-        dbg!(position);
-        dbg!(positions_two[index]);
+    let mut manhattan: i64 = 0;
+    for (i, position) in positions_one.iter().enumerate() {
+        if i % 1000 == 0 {
+            dbg!(i);
+        }
+        if positions_two.contains(position) {
+            let distance = position.0.abs() + position.1.abs();
+            if distance < manhattan || manhattan == 0 {
+                manhattan = distance;
+            }
+        }
     }
-    // for (pos1, pos2) in zip(positions_one, positions_two) {
-    //     if pos1 == pos2 {
-    //         crossings.push((*pos1, 123));
-    //     }
-    // }
-    // dbg!(crossings);
-    123
+    manhattan
 }
 
 //
