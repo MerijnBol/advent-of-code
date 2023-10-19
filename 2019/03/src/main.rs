@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::{env, fs};
 
 fn main() {
@@ -16,6 +17,13 @@ fn puzzle_one(line_one: &Vec<&str>, line_two: &Vec<&str>) -> i64 {
         distance_closest_crossing
     );
     distance_closest_crossing
+}
+#[test]
+fn puzzle_one_result() {
+    let content = read_puzzle_input();
+    let (line_one, line_two) = parse_content(&content);
+
+    assert_eq!(puzzle_one(&line_one, &line_two), 1064)
 }
 
 fn get_positions(instructions: &Vec<&str>) -> Vec<(i64, i64)> {
@@ -58,16 +66,24 @@ fn get_positions(instructions: &Vec<&str>) -> Vec<(i64, i64)> {
     positions
 }
 
+fn position_display(position: &(i64, i64)) -> String {
+    format!("({}, {})", position.0, position.1)
+}
+
 fn get_closest_crossing_distance(
     positions_one: &Vec<(i64, i64)>,
     positions_two: &Vec<(i64, i64)>,
 ) -> i64 {
     let mut manhattan: i64 = 0;
-    for (i, position) in positions_one.iter().enumerate() {
-        if i % 1000 == 0 {
-            dbg!(i);
-        }
-        if positions_two.contains(position) {
+
+    // Use hasmap instead of vector as that will search MUCH quicker
+    let mut hasmap = HashMap::new();
+    for position in positions_two.iter() {
+        hasmap.insert(position_display(position), position);
+    }
+
+    for position in positions_one.iter() {
+        if hasmap.contains_key(position_display(position).as_str()) {
             let distance = position.0.abs() + position.1.abs();
             if distance < manhattan || manhattan == 0 {
                 manhattan = distance;
