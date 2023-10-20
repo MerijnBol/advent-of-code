@@ -9,8 +9,8 @@ fn main() {
 }
 
 fn puzzle_one(line_one: &Vec<&str>, line_two: &Vec<&str>) -> i64 {
-    let positions_one = get_positions(line_one);
-    let positions_two = get_positions(line_two);
+    let positions_one = get_route(line_one);
+    let positions_two = get_route(line_two);
     let distance_closest_crossing = get_closest_crossing_distance(&positions_one, &positions_two);
     println!(
         "Manhatten distance of closest intersect is: {}",
@@ -26,65 +26,44 @@ fn puzzle_one_result() {
     assert_eq!(puzzle_one(&line_one, &line_two), 1064)
 }
 
-fn get_positions(instructions: &Vec<&str>) -> Vec<(i64, i64)> {
-    let mut positions = Vec::new();
+fn get_route(instructions: &Vec<&str>) -> HashMap<String, (i64, i64)> {
+    // For each instruction, add all traveled positions to the hashmap.
+    let mut route = HashMap::new();
     let mut x: i64 = 0;
     let mut y: i64 = 0;
-    positions.push((x, y));
     for instruction in instructions.iter() {
         let command = &instruction[0..1];
         let pos = instruction[1..].parse::<i64>().unwrap();
-        match command {
-            "R" => {
-                for _ in 0..pos {
-                    x += 1;
-                    positions.push((x, y));
-                }
+        for _ in 0..pos {
+            match command {
+                "R" => x += 1,
+                "L" => x -= 1,
+                "U" => y += 1,
+                "D" => y -= 1,
+                &_ => (),
             }
-            "L" => {
-                for _ in 0..pos {
-                    x -= 1;
-                    positions.push((x, y));
-                }
-            }
-            "U" => {
-                for _ in 0..pos {
-                    y += 1;
-                    positions.push((x, y));
-                }
-            }
-            "D" => {
-                for _ in 0..pos {
-                    y -= 1;
-                    positions.push((x, y));
-                }
-            }
-            &_ => (),
+            route.insert(position_display(&x, &y), (x, y));
         }
-        positions.push((x, y));
     }
-    positions
+    route
 }
 
-fn position_display(position: &(i64, i64)) -> String {
-    format!("({}, {})", position.0, position.1)
+fn position_display(x: &i64, y: &i64) -> String {
+    format!("({}, {})", x, y)
 }
 
 fn get_closest_crossing_distance(
-    positions_one: &Vec<(i64, i64)>,
-    positions_two: &Vec<(i64, i64)>,
+    positions_one: &HashMap<String, (i64, i64)>,
+    positions_two: &HashMap<String, (i64, i64)>,
 ) -> i64 {
     let mut manhattan: i64 = 0;
 
-    // Use hasmap instead of vector as that will search MUCH quicker
-    let mut hasmap = HashMap::new();
-    for position in positions_two.iter() {
-        hasmap.insert(position_display(position), position);
-    }
-
-    for position in positions_one.iter() {
-        if hasmap.contains_key(position_display(position).as_str()) {
+    for (key, position) in positions_one.iter() {
+        if positions_two.contains_key(key) {
             let distance = position.0.abs() + position.1.abs();
+            if distance == 0 {
+                continue;
+            }
             if distance < manhattan || manhattan == 0 {
                 manhattan = distance;
             }
