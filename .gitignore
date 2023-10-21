@@ -5,6 +5,7 @@ __pycache__
 # Don't track advent of codes unique puzzle inputs
 input.txt
 list.txt
+inputs
 
 # RUST files
 target*
