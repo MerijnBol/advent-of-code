@@ -48,19 +48,17 @@ fn puzzle_two(
 ) -> i64 {
     // Hashmap for storing each junction, and how long each route takes to get there.
     let mut distances: HashMap<&str, i64> = HashMap::new();
-    let mut counter = 1;
-    for position in line_one.iter() {
+    for (index, position) in line_one.iter().enumerate() {
         if hash_two.contains_key(position.as_str()) {
-            distances.insert(position.as_str(), counter);
+            let steps = index as i64 + 1;
+            distances.insert(position.as_str(), steps);
         }
-        counter += 1;
     }
-    counter = 1;
-    for position in line_two.iter() {
+    for (index, position) in line_two.iter().enumerate() {
         if distances.contains_key(position.as_str()) {
-            distances.insert(position.as_str(), distances[position.as_str()] + counter);
+            let steps = index as i64 + 1;
+            distances.insert(position.as_str(), distances[position.as_str()] + steps);
         }
-        counter += 1;
     }
     let mut result = 0;
     for value in distances.values() {
