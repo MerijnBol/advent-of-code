@@ -1,8 +1,10 @@
 use std::env;
 use std::fs;
 
-fn main() {
-    let path: String = create_path_to_file("input.txt");
+const INPUT_FILE_NAME: &str = "two.txt";
+
+pub fn main() {
+    let path: String = create_path_to_file();
 
     // TODO Find out how to do this properly
     let intcode = read_input(&path);
@@ -86,9 +88,10 @@ fn run_intcode(intcode: Vec<u64>) -> Vec<u64> {
     intcode
 }
 
-fn create_path_to_file(filename: &str) -> String {
+fn create_path_to_file() -> String {
     let mut working_dir = env::current_dir().expect("Get current dir");
-    working_dir.push(filename);
+    working_dir.push("inputs");
+    working_dir.push(INPUT_FILE_NAME);
     return working_dir.to_str().expect("Must have a path!").into();
 }
 

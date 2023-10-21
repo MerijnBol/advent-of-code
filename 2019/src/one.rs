@@ -1,8 +1,10 @@
 use std::env;
 use std::fs;
 
-fn main() {
-    let path: String = create_path_to_file("input.txt");
+const INPUT_FILE_NAME: &str = "one.txt";
+
+pub fn main() {
+    let path: String = create_path_to_file();
     let masses = read_input(&path);
     println!("Fuel load puzzle 1: {} kg", calculate_fuel(&masses));
 
@@ -41,9 +43,10 @@ fn calculate_recursive_fuel(masses: &Vec<u32>) -> u32 {
     return total;
 }
 
-fn create_path_to_file(filename: &str) -> String {
+fn create_path_to_file() -> String {
     let mut working_dir = env::current_dir().expect("Get current dir");
-    working_dir.push(filename);
+    working_dir.push("inputs");
+    working_dir.push(INPUT_FILE_NAME);
     return working_dir.to_str().expect("Must have a path!").into();
 }
 

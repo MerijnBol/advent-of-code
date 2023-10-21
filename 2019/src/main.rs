@@ -1,3 +1,11 @@
+mod four;
+mod one;
+mod three;
+mod two;
+
 fn main() {
-    println!("Hello, world!");
+    one::main();
+    two::main();
+    three::main();
+    four::main();
 }

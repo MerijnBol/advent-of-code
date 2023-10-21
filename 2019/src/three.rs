@@ -1,7 +1,9 @@
 use std::collections::HashMap;
 use std::{env, fs};
 
-fn main() {
+const INPUT_FILE_NAME: &str = "three.txt";
+
+pub fn main() {
     let content = read_puzzle_input();
     let (line_one, line_two) = parse_content(&content);
     let (positions_one, ordered_one) = get_route(&line_one);
@@ -114,14 +116,15 @@ fn position_display(pos: &(i64, i64)) -> String {
 //
 // Deal with parsing puzzle input
 //
-fn create_path_to_file(filename: &str) -> String {
+fn create_path_to_file() -> String {
     let mut working_dir = env::current_dir().expect("Get current dir");
-    working_dir.push(filename);
+    working_dir.push("inputs");
+    working_dir.push(INPUT_FILE_NAME);
     return working_dir.to_str().expect("Must have a path!").into();
 }
 
 fn read_puzzle_input() -> String {
-    let path = create_path_to_file("input.txt");
+    let path = create_path_to_file();
 
     let content = fs::read_to_string(path).expect("Read file");
     content

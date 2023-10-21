@@ -1,8 +1,8 @@
 use std::{collections::HashMap, env, fs, i64, vec::Vec};
 
-const INPUT_FILE_NAME: &str = "input.txt";
+const INPUT_FILE_NAME: &str = "four.txt";
 
-fn main() {
+pub fn main() {
     let content = read_puzzle_input();
     let (range_start, range_end) = parse_content(&content);
     puzzle_one(&range_start, &range_end);
@@ -138,6 +138,7 @@ fn it_fails_for_non_incremental() {
 //
 fn read_puzzle_input() -> String {
     let mut working_dir = env::current_dir().expect("Get current dir");
+    working_dir.push("inputs");
     working_dir.push(INPUT_FILE_NAME);
     let path: &str = working_dir.to_str().expect("Must have a path!").into();
     let content = fs::read_to_string(path).expect("Read file");
