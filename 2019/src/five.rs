@@ -4,38 +4,62 @@ pub fn main() {
     // let content = read_input("five.txt");
     let content = "1002,4,3,4,33".to_string();
     let intcode = get_intcode(&content);
-    dbg!(&intcode);
-    run_intcode_v2(intcode);
+    run_intcode_v2(&intcode);
 }
 
-fn run_intcode_v2(intcode: Vec<i64>) {
-    let mut intcode = intcode;
+// fn run_intcode_v2(intcode: &Vec<&str>) -> Vec<&str> {
+fn run_intcode_v2(intcode_source: &Vec<String>) {
+    let mut intcode = intcode_source.clone();
     let mut pointer: usize = 0;
     loop {
-        let instruction = intcode[pointer];
-        let target_index_1 = intcode[pointer + 1] as usize;
-        let target_index_2 = intcode[pointer + 2] as usize;
-        let target_index_3 = intcode[pointer + 3] as usize;
-        let out_of_bounds = target_index_1 >= intcode.len()
-            || target_index_2 >= intcode.len()
-            || target_index_3 >= intcode.len();
-
-        if instruction == 99 || out_of_bounds {
-            break;
-        } else if instruction == 1 {
-            intcode[target_index_3] = intcode[target_index_1] + intcode[target_index_2];
-            pointer += 4;
-        } else if instruction == 2 {
-            intcode[target_index_3] = intcode[target_index_1] * intcode[target_index_2];
-            pointer += 4;
-        } else if instruction == 3 {
-        } else if instruction == 4 {
+        let (opcode, modes) = decode_instruction(&intcode[pointer]);
+        let mut arguments: Vec<i64> = Vec::new();
+        for index in 0..modes.len() {
+            arguments.push(intcode[pointer + 1 + index].parse().unwrap())
         }
+
+        if opcode == 99 {
+            break;
+        } else if opcode == 1 {
+            intcode = intcode_operation(intcode, &arguments, &modes, "add");
+        } else if opcode == 2 {
+            intcode = intcode_operation(intcode, &arguments, &modes, "mul");
+        } else if opcode == 3 {
+        } else if opcode == 4 {
+        };
+        pointer += arguments.len() + 1;
     }
-    dbg!(intcode);
 }
 
-fn decode_instruction(instruction: &str) -> (i64, Vec<i64>) {
+fn intcode_operation(
+    mut code: Vec<String>,
+    args: &Vec<i64>,
+    modes: &Vec<i64>,
+    operation: &str,
+) -> Vec<String> {
+    // intcode_r[target_index_3] = intcode_r[target_index_1] + intcode_r[target_index_2];
+    let val_1: i64 = if modes[0] == 0 {
+        let index = args[0] as usize;
+        code[index].parse().unwrap()
+    } else {
+        args[0]
+    };
+    let val_2: i64 = if modes[1] == 0 {
+        let index = args[1] as usize;
+        code[index].parse().unwrap()
+    } else {
+        args[1]
+    };
+    let index = args[2] as usize;
+    if operation == "add" {
+        code[index] = (val_1 + val_2).to_string();
+    } else {
+        code[index] = (val_1 * val_2).to_string();
+    }
+    code
+}
+
+fn decode_instruction(instruction: &String) -> (i64, Vec<i64>) {
     // Find opcode, and return the modes for required numbered of arguments.
     let mut modes = Vec::new();
     let length = instruction.len();
@@ -61,23 +85,23 @@ fn decode_instruction(instruction: &str) -> (i64, Vec<i64>) {
 }
 #[test]
 fn it_decodes_instruction_one() {
-    assert_eq!(decode_instruction("11001"), (1, vec![0, 1, 1]));
+    assert_eq!(decode_instruction(&"11001".to_string()), (1, vec![0, 1, 1]));
 }
 #[test]
 fn it_decodes_instruction_two() {
-    assert_eq!(decode_instruction("1002"), (2, vec![0, 1, 0]));
+    assert_eq!(decode_instruction(&"1002".to_string()), (2, vec![0, 1, 0]));
 }
 #[test]
 fn it_decodes_instruction_three() {
-    assert_eq!(decode_instruction("03"), (3, vec![0]));
+    assert_eq!(decode_instruction(&"03".to_string()), (3, vec![0]));
 }
 #[test]
 fn it_decodes_instruction_four() {
-    assert_eq!(decode_instruction("104"), (4, vec![1]));
+    assert_eq!(decode_instruction(&"104".to_string()), (4, vec![1]));
 }
 #[test]
 fn it_decodes_ending_instruction() {
-    assert_eq!(decode_instruction("99"), (99, Vec::new()));
+    assert_eq!(decode_instruction(&"99".to_string()), (99, Vec::new()));
 }
 
 fn read_input(filename: &str) -> String {
@@ -89,13 +113,13 @@ fn read_input(filename: &str) -> String {
     content
 }
 
-fn get_intcode(content: &String) -> Vec<i64> {
-    let mut intcode: Vec<i64> = Vec::new();
+fn get_intcode(content: &String) -> Vec<String> {
+    let mut intcode: Vec<String> = Vec::new();
     for code in content.split(",") {
         if code == "" {
             continue;
         }
-        intcode.push(code.parse::<i64>().unwrap())
+        intcode.push(code.to_string());
     }
     intcode
 }
