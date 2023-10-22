@@ -23,7 +23,7 @@ fn puzzle_one(intcode: Vec<u64>) -> u64 {
 }
 #[test]
 fn puzzle_one_gives_correct_answer() {
-    let path: String = create_path_to_file("input.txt");
+    let path: String = create_path_to_file();
     let intcode = read_input(&path);
     assert_eq!(puzzle_one(intcode), 3562624);
 }
@@ -58,7 +58,7 @@ fn puzzle_two(intcode: Vec<u64>) -> u64 {
 
 #[test]
 fn test_puzzle_two_result() {
-    let path: String = create_path_to_file("input.txt");
+    let path: String = create_path_to_file();
     let intcode = read_input(&path);
     assert_eq!(puzzle_two(intcode), 8298);
 }
