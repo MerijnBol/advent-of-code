@@ -8,7 +8,7 @@ pub fn main() {
 }
 
 // fn run_intcode_v2(intcode: &Vec<&str>) -> Vec<&str> {
-fn run_intcode_v2(intcode_source: &Vec<String>) {
+fn run_intcode_v2(intcode_source: &Vec<String>, input: i64) -> i64 {
     let mut intcode = intcode_source.clone();
     let mut pointer: usize = 0;
     loop {
@@ -25,10 +25,25 @@ fn run_intcode_v2(intcode_source: &Vec<String>) {
         } else if opcode == 2 {
             intcode = intcode_operation(intcode, &arguments, &modes, "mul");
         } else if opcode == 3 {
+            let index = arguments[0] as usize;
+            intcode[index] = input.to_string();
         } else if opcode == 4 {
+            let index = arguments[0] as usize;
+            return intcode[index].parse().unwrap();
         };
         pointer += arguments.len() + 1;
     }
+}
+
+fn opcode_three(mut code: Vec<String>, args: &Vec<i64>, modes: &Vec<i64>) -> Vec<String> {
+    let val: i64 = if modes[0] == 0 {
+        let index = args[0] as usize;
+        code[index].parse().unwrap()
+    } else {
+        args[0]
+    };
+
+    code
 }
 
 fn intcode_operation(
