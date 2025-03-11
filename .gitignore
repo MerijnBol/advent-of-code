@@ -9,3 +9,10 @@ inputs
 
 # RUST files
 target*
+
+# Compiled Java class files
+*.class
+
+# Package files
+*.jar
+*.war
