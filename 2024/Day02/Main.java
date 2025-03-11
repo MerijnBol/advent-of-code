@@ -9,42 +9,33 @@ public class Main {
     public static void main(String[] args) {
         try {
             List<String> input = Files.readAllLines(Paths.get("Day02/input.txt"));
+            List<Report> reports = parseInput(input);
 
-            List<List<Integer>> reports = parseInput(input);
+            // Puzzle 1
             int safeCount = 0;
-            for (int i = 0; i < reports.size(); i++) {
-                ReportResult result = reportSafe(reports.get(i));
+            List<Report> unsafeReports = new ArrayList<>();
+            List<ReportResult> unsafeResults = new ArrayList<>();
+
+            for (Report report : reports) {
+                ReportResult result = report.checkSafety();
                 if (result.isSafe) {
                     safeCount++;
+                } else {
+                    unsafeReports.add(report);
+                    unsafeResults.add(result);
                 }
             }
             System.out.println("Reports safe: " + safeCount);
 
             // Puzzle 2
-            safeCount = 0;
-            // Any failing report gets stored as a second chance. We need 2
-            // lists since removing either of the 2 failing positions could make
-            // the report valid.
-            List<List<Integer>> secondChanceA = new ArrayList<>();
-            List<List<Integer>> secondChanceB = new ArrayList<>();
-            for (int i = 0; i < reports.size(); i++) {
-                ReportResult result = reportSafe(reports.get(i));
-                if (result.isSafe) {
-                    safeCount++;
-                } else {
-                    // Add the 2 second chances
-                    List<Integer> reportA = new ArrayList<>(reports.get(i));
-                    List<Integer> reportB = new ArrayList<>(reports.get(i));
-                    reportA.remove(result.position);
-                    reportB.remove(result.position + 1);
-                    secondChanceA.add(reportA);
-                    secondChanceB.add(reportB);
-                }
-            }
-            // Try the second chances one more time. If one of them is safe, we count it.
-            for (int i = 0; i < secondChanceA.size(); i++) {
-                ReportResult resultA = reportSafe(secondChanceA.get(i));
-                ReportResult resultB = reportSafe(secondChanceB.get(i));
+            for (int i = 0; i < unsafeReports.size(); i++) {
+                Report report = unsafeReports.get(i);
+                ReportResult result = unsafeResults.get(i);
+
+                Report[] secondChances = report.createSecondChances(result.position);
+                ReportResult resultA = secondChances[0].checkSafety();
+                ReportResult resultB = secondChances[1].checkSafety();
+
                 if (resultA.isSafe || resultB.isSafe) {
                     safeCount++;
                 }
@@ -56,54 +47,18 @@ public class Main {
         }
     }
 
-    public static class ReportResult {
-        public final boolean isSafe;
-        public final int position;
+    public static List<Report> parseInput(List<String> lines) {
+        List<Report> reports = new ArrayList<>();
 
-        public ReportResult(boolean isSafe, int position) {
-            this.isSafe = isSafe;
-            this.position = position;
-        }
-    }
+        for (String line : lines) {
+            List<Integer> values = new ArrayList<>();
+            String[] split = line.split("\\s+");
 
-    public static ReportResult reportSafe(List<Integer> report) {
-        int midpoint = report.size() / 2;
-        int skippoint = report.size() - report.size() / 2;
-        Integer firstHalve = report.stream().limit(midpoint).mapToInt(Integer::intValue).sum();
-        Integer secondHalve = report.stream().skip(skippoint).mapToInt(Integer::intValue).sum();
-        int direction = 0;
-        if (firstHalve < secondHalve) {
-            direction = 1;
-        } else {
-            direction = -1;
-        }
-
-        for (int i = 0; i < report.size() - 1; i++) {
-            Integer gap = report.get(i + 1) - report.get(i);
-            if (!validGap(gap, direction)) {
-                return new ReportResult(false, i);
+            for (String value : split) {
+                values.add(Integer.parseInt(value));
             }
-        }
-        return new ReportResult(true, -1);
-    }
 
-    public static boolean validGap(int gap, int direction) {
-        final int MAX_ALLOWED_GAP = 3;
-        if (Math.abs(gap) == 0 || Math.abs(gap) > MAX_ALLOWED_GAP || direction * gap < 0) {
-            return false;
-        }
-        return true;
-    }
-
-    public static List<List<Integer>> parseInput(List<String> lines) {
-        List<List<Integer>> reports = new ArrayList<>();
-        for (int i = 0; i < lines.size(); i++) {
-            List<Integer> report = new ArrayList<>();
-            String[] split = lines.get(i).split("\\s+");
-            for (int j = 0; j < split.length; j++) {
-                report.add(Integer.parseInt(split[j]));
-            }
-            reports.add(report);
+            reports.add(new Report(values));
         }
 
         return reports;
