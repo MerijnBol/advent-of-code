@@ -29,12 +29,53 @@ public class Page {
     }
 
     public int findCrossWords() {
-        String word = "MAS";
-        int count = 0;
-        List<Coordinate> aPos = new ArrayList<>();
-        for (Coordinate coor : this.findAllCharacters('M')) {
-            aPos += this.findWordsFromLetter(word, coor);
+        // Find all "MAS" occurrences. Track the position of the A char.
+        List<List<Coordinate>> aPos = new ArrayList<>();
+        for (Coordinate cM : this.findAllCharacters('M')) {
+            List<Coordinate> secondLetters = findChars('A', cM);
+            for (Coordinate cA : secondLetters) {
+                List<Coordinate> nextCs = this.getNextTwoCoordinates(cM, cA);
+                try {
+                    if (this.getForCoordinate(nextCs.get(0)) == 'S') {
+                        // Store the position of the M and A chars
+                        aPos.add(Arrays.asList(cM, cA));
+                    }
+                } catch (Exception e) {
+                    //
+                }
+            }
         }
+
+        // Sort all word finds by the position of the A char
+        Map<String, List<List<Coordinate>>> counts = new HashMap<>();
+        for (List<Coordinate> list : aPos) {
+            String key = list.get(1).toString();
+            List<List<Coordinate>> value = counts.getOrDefault(key, new ArrayList<>());
+            value.add(list);
+            counts.put(key, value);
+        }
+
+        // Find all valid crosses of the word "MAS"
+        int count = 0;
+        for (List<List<Coordinate>> words : counts.values()) {
+            // For each set of words with the same A position: check if it's a
+            // valid cross by having either 2 diagonals or 2 horizontals.
+            int diagonals = 0;
+            int horizontals = 0;
+            for (List<Coordinate> word : words) {
+                int dx = word.get(0).x - word.get(1).x;
+                int dy = word.get(0).y - word.get(1).y;
+                if (Math.abs(dx) == 1 && Math.abs(dy) == 1) {
+                    diagonals += 1;
+                } else {
+                    horizontals += 1;
+                }
+            }
+            if (diagonals >= 2 || horizontals >= 2) {
+                count += 1;
+            }
+        }
+
         return count;
     }
 
