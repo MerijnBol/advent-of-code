@@ -20,6 +20,24 @@ public class Page {
         return data.get(coordinate.y).charAt(coordinate.x);
     }
 
+    public void writeForCoordinate(Coordinate coordinate, char letter) {
+        String line = this.data.get(coordinate.y);
+        String newLine = line.substring(0, coordinate.x) + letter + line.substring(coordinate.x + 1);
+        this.data.set(coordinate.y, newLine);
+    }
+
+    public void writeAllData(char letter) {
+        for (int y = 0; y < height; y++) {
+            String line = this.data.get(y);
+            String newLine = String.valueOf(letter).repeat(line.length());
+            this.data.set(y, newLine);
+        }
+    }
+
+    public String toString() {
+        return String.join("\n", this.data);
+    }
+
     public int findWordCount(String word) {
         int count = 0;
         for (Coordinate coor : this.findAllCharacters(word.charAt(0))) {
@@ -38,7 +56,7 @@ public class Page {
                 try {
                     if (this.getForCoordinate(nextCs.get(0)) == 'S') {
                         // Store the position of the M and A chars
-                        aPos.add(Arrays.asList(cM, cA));
+                        aPos.add(Arrays.asList(cM, cA, nextCs.get(0)));
                     }
                 } catch (Exception e) {
                     //
@@ -59,19 +77,16 @@ public class Page {
         int count = 0;
         for (List<List<Coordinate>> words : counts.values()) {
             // For each set of words with the same A position: check if it's a
-            // valid cross by having either 2 diagonals or 2 horizontals.
+            // valid cross by having 2 diagonals.
             int diagonals = 0;
-            int horizontals = 0;
             for (List<Coordinate> word : words) {
                 int dx = word.get(0).x - word.get(1).x;
                 int dy = word.get(0).y - word.get(1).y;
                 if (Math.abs(dx) == 1 && Math.abs(dy) == 1) {
                     diagonals += 1;
-                } else {
-                    horizontals += 1;
                 }
             }
-            if (diagonals >= 2 || horizontals >= 2) {
+            if (diagonals >= 2) {
                 count += 1;
             }
         }
